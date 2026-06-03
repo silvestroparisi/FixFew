@@ -250,7 +250,7 @@ const I18N={
  en:{
   heroEyebrow:`GUIDED VULNERABILITY REMEDIATION`,
   heroH1:`Stop patching everything.`,
-  heroH1b:`Fix the few that matter.`,
+  heroH1b:`Fix the Few that matter.`,
   cta1:`Start →`, cta2:`How it works`,
   lead:`Knowing what to fix is half the job. FixFew does the other half with you — is it really exploitable on your gear, and the least-disruptive way to close it. Free, private, your own AI.`,
   story1:`Prioritizing isn't fixing. The real work comes after: figuring out whether a vulnerability is actually exploitable on <b>your</b> asset or already mitigated, and choosing the least-disruptive fix — often a config change, not necessarily an upgrade. "Patch everything" isn't a strategy; it's a way to never finish.`,
@@ -281,7 +281,7 @@ const I18N={
   count:n=>`${n} findings loaded`,
   viewLabel:`Group by:`, vAsset:`Asset`, vCve:`CVE`, vFlat:`Flat`,
   assistAsset:n=>`Assist asset · ${n} CVE${n>1?'s':''}`, assistCve:n=>`Assist CVE · ${n} asset${n>1?'s':''}`, assistOne:`Assist`,
-  footer:`Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · CVE data: NVD · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">github.com/silvestroparisi/FixFew</a>`,
+  footer:`Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · CVE data: NVD · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">github.com/silvestroparisi/FixFew</a> · companion: <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a>`,
   send:`Send`, composePh:`Answer, or paste a config / command output…`,
   noKey:`Set your provider and API key in section 1 first.`,
   grounding:`Reading CVE details…`, groundFail:`Some CVE details couldn't be fetched — the assistant will rely on the model's knowledge for those.`,
@@ -330,7 +330,7 @@ const I18N={
   count:n=>`${n} finding caricati`,
   viewLabel:`Raggruppa per:`, vAsset:`Asset`, vCve:`CVE`, vFlat:`Singoli`,
   assistAsset:n=>`Assisti asset · ${n} CVE`, assistCve:n=>`Assisti CVE · ${n} asset`, assistOne:`Assisti`,
-  footer:`Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · dati CVE: NVD · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">github.com/silvestroparisi/FixFew</a>`,
+  footer:`Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · dati CVE: NVD · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">github.com/silvestroparisi/FixFew</a> · compagno: <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a>`,
   send:`Invia`, composePh:`Rispondi, o incolla una config / l'output di un comando…`,
   noKey:`Imposta prima provider e chiave API nella sezione 1.`,
   grounding:`Leggo i dettagli delle CVE…`, groundFail:`Alcuni dettagli CVE non sono stati recuperati — per quelli l'assistente userà la conoscenza del modello.`,
@@ -551,17 +551,23 @@ Explain the vulnerability and its preconditions ONCE. Then help verify, PER ASSE
   scope=`You are remediating ONE finding (one CVE on one asset).
 Verify whether THIS asset is actually exploitable or already mitigated, then give the least-disruptive fix (a config change is often enough — don't default to an upgrade).`;
  }
- return `You are a precise vulnerability remediation analyst. Reply in ${lang}. Be concise and concrete. Interview the user a few targeted questions at a time and ask them to paste the specific config/command output you need.
+ return `You are a precise vulnerability remediation analyst. Reply in ${lang}. Be concise and concrete.
+Your job is to DECIDE, not to interview endlessly. To judge whether a CVE applies you normally need only two things per CVE: (1) the asset's exact version, and (2) whether the vulnerable feature/component is enabled. Ask for BOTH in ONE round, naming the exact config or command output you need — and ask for nothing else.
 
 ${scope}
 
 Findings in scope (authoritative data from NVD where available):${groundBlock(s)}
 
-Rules: never invent versions or facts; if unsure, say so and point to the vendor advisory in the refs. Frame everything as guidance to verify, not a guarantee.
+Decision rules — follow strictly:
+- The affected-version ranges are already given above. Compare the user's version against them YOURSELF; do not ask the user to look them up, and do not request extra command output once you know the version and the feature state.
+- As soon as you know the version (in or out of the affected range) AND whether the vulnerable feature is enabled, you have enough: output the STATUS line(s) right away and STOP asking.
+- Ask at most ONE round of clarifying questions. If the reply lets you decide, conclude. If it is still ambiguous after that one round, do NOT keep asking — conclude with status "verify" and give the single concrete check the user should run themselves.
+- Never request the same information twice, and never ask for output that is not needed for the decision.
+- Never invent versions or facts; if something is missing, say so and point to the vendor advisory in the refs. Frame conclusions as guidance to verify, not a guarantee.
 
-When you reach a conclusion for a finding, output one line per finding in EXACTLY this format (the app parses it):
+When you conclude a finding, output one line for it in EXACTLY this format (the app parses it):
 STATUS: <CVE-id> @ <asset> | <vulnerable|mitigated|not_applicable|verify> | <one short sentence: what to do / why>
-Use the exact asset name(s): ${assets.join(', ')}. Output a STATUS line only when you've actually concluded that finding; you can output several at once. Also give a short consolidated remediation plan in prose.`;}
+Use the exact asset name(s): ${assets.join(', ')}. Emit a STATUS line as soon as you've concluded a finding (you can emit several at once); don't wait until everything is done. Then give a short consolidated remediation plan in prose.`;}
 
 // ---------- sessions / sheet ----------
 let SESSIONS={};let CUR=null;
