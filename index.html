@@ -508,9 +508,12 @@ async function getEngine(modelId){if(!navigator.gpu)throw new Error(T().noWebGPU
 
 // ---------- LLM ----------
 function cfg(){const pv=byId('provider').value;return {provider:pv,base:byId('base').value.trim().replace(/\/$/,''),model:(pv==='webllm'?byId('wlModel').value:byId('model').value.trim()),key:byId('apikey').value.trim(),kind:PROVIDERS[pv].kind};}
-async function callLLM(system,history){const c=cfg();
+async function callLLM(system,history,onToken){const c=cfg();
  if(c.kind==='webllm'){const engine=await getEngine(c.model);
-  const r=await engine.chat.completions.create({messages:[{role:'system',content:system}].concat(history),temperature:0.2,max_tokens:1500});
+  const msgs=[{role:'system',content:system}].concat(history);
+  if(onToken){const stream=await engine.chat.completions.create({messages:msgs,temperature:0.2,max_tokens:1500,stream:true});
+   let full='';for await(const ch of stream){const d=ch.choices&&ch.choices[0]&&ch.choices[0].delta&&ch.choices[0].delta.content||'';if(d){full+=d;onToken(full);}}return full;}
+  const r=await engine.chat.completions.create({messages:msgs,temperature:0.2,max_tokens:1500});
   return r.choices&&r.choices[0]&&r.choices[0].message&&r.choices[0].message.content||'';}
  if(c.kind==='anthropic'){
   const r=await fetch(c.base+'/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -583,6 +586,7 @@ function closeSheet(){byId('sheet').classList.remove('open');}
 function sysMsg(txt){CUR.chat.push({role:'_sys',content:txt});renderChat();}
 function renderChat(){const s=CUR,host=byId('chat');
  host.innerHTML=s.chat.map(m=>{
+  if(m.hidden)return '';
   if(m.role==='_sys')return `<div class="msg sys">${esc(m.content)}</div>`;
   if(m.role==='user')return `<div class="msg user">${esc(m.content)}</div>`;
   const vs=parseStatuses(m.content);
@@ -606,13 +610,17 @@ async function turn(userText,hidden){const s=CUR,t=T(),c=cfg();
  if(!hidden){let shown=userText;
   if(byId('redact').checked){const red=redactSecrets(userText);if(red!==userText){shown=red+'\n'+t.redactedNote;userText=red;}}
   s.chat.push({role:'user',content:shown});
- }else s.chat.push({role:'user',content:userText});
+ }else s.chat.push({role:'user',content:userText,hidden:true});
  renderChat();sysMsg(t.thinking);
+ const clean=()=>{s.chat=s.chat.filter(m=>!(m.role==='_sys'&&(m.content===t.thinking||m.prog)));};
  try{const hist=s.chat.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role,content:m.content}));
-  const reply=await callLLM(systemPrompt(s),hist);
-  s.chat=s.chat.filter(m=>!(m.role==='_sys'&&(m.content===t.thinking||m.prog)));
-  s.chat.push({role:'assistant',content:reply});renderChat();
- }catch(e){s.chat=s.chat.filter(m=>!(m.role==='_sys'&&(m.content===t.thinking||m.prog)));s.chat.push({role:'_sys',content:'⚠ '+e.message});renderChat();}}
+  let asst=null;
+  const onToken=full=>{if(!asst){clean();asst={role:'assistant',content:full};s.chat.push(asst);}else asst.content=full;renderChat();};
+  const reply=await callLLM(systemPrompt(s),hist,onToken);
+  clean();
+  if(asst)asst.content=reply;else s.chat.push({role:'assistant',content:reply});
+  renderChat();
+ }catch(e){clean();s.chat.push({role:'_sys',content:'⚠ '+e.message});renderChat();}}
 function send(){const ta=byId('compose'),v=ta.value.trim();if(!v||!CUR)return;ta.value='';turn(v,false);}
 byId('compose').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();send();}});
 
