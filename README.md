@@ -7,7 +7,7 @@ FirstFew tells you *which* findings matter; FixFew helps you actually close them
 
 It's a single, self-contained web page. No backend, no build step, no tracking.
 
-> Stop patching everything. Fix the few that matter.
+> Stop patching everything. Fix the Few that matter.
 
 ## What it does
 
