@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FixFew — guided remediation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0c10;--panel:#11151c;--panel-2:#161b24;--line:#222a36;--line-soft:#1a212b;--txt:#dfe6f0;--txt-dim:#8893a4;--txt-faint:#5b6573;--p0:#ff3b53;--p1:#ff9a3c;--p2:#ffd23c;--p3:#3da6ff;--kev:#ff3b53;--accent:#37e0b0;--op:#a78bfa;--warn:#ff9a3c;--grid:rgba(120,140,170,0.045);}
+  html[data-theme="light"]{--bg:#f5f7fa;--panel:#ffffff;--panel-2:#eef1f6;--line:#dde3ec;--line-soft:#e8edf3;--txt:#141a24;--txt-dim:#54607a;--txt-faint:#8b94a6;--p0:#e11d48;--p1:#d9731a;--p2:#b8860b;--p3:#1f78d1;--kev:#e11d48;--accent:#0fae82;--op:#6d4bff;--warn:#c2410c;--grid:rgba(30,50,90,0.05);}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;min-height:100vh;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:42px 42px;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+  a{color:var(--accent);text-decoration:none}
+  code{font-family:'IBM Plex Mono',monospace;font-size:.92em;background:var(--panel-2);padding:1px 5px;border-radius:4px;}
+  .wrap{max-width:980px;margin:0 auto;padding:0 18px;}
+  .topbar{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+  .topbar .row{display:flex;align-items:center;gap:12px;padding:12px 0;}
+  .brand{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:19px;font-weight:700;letter-spacing:.02em;}
+  .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+  .ac{color:var(--accent);}
+  .tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+  .back{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txt-dim);}
+  .langsw,.themesw{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+  .langsw span,.themesw span{padding:7px 11px;cursor:pointer;color:var(--txt-faint);user-select:none;letter-spacing:.06em;}
+  .langsw span.on,.themesw span.on{background:var(--accent);color:#04140f;font-weight:600;}
+  .langsw span:hover:not(.on),.themesw span:hover:not(.on){color:var(--txt);}
+  h1{font-family:'Space Mono',monospace;font-size:clamp(24px,4vw,34px);margin:26px 0 6px;}
+  h2{font-family:'Space Mono',monospace;font-size:18px;margin:0 0 4px;}
+  .lead{color:var(--txt-dim);max-width:680px;margin:0 0 18px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);}
+  .banner{display:flex;gap:11px;background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:10px;padding:13px 15px;margin:0 0 22px;font-size:13px;color:var(--txt-dim);}
+  .banner b{color:var(--txt);}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin:0 0 16px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  label.fld{display:block;font-size:12px;color:var(--txt-dim);margin:0 0 5px;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;}
+  input[type=text],input[type=password],select,textarea{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--txt);padding:9px 11px;font-family:'IBM Plex Mono',monospace;font-size:13px;}
+  textarea{font-size:12.5px;resize:vertical;min-height:80px;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+  .field{margin-bottom:12px;}
+  button{font-family:'IBM Plex Mono',monospace;font-size:12.5px;cursor:pointer;border-radius:8px;padding:9px 14px;border:1px solid var(--line);background:var(--panel-2);color:var(--txt);}
+  button:hover{border-color:var(--accent);color:var(--accent);}
+  button.primary{background:var(--accent);color:#04140f;border-color:var(--accent);font-weight:600;}
+  button.primary:hover{filter:brightness(1.08);color:#04140f;}
+  input[type=file]{display:none;}
+  .row-btns{display:flex;flex-wrap:wrap;gap:9px;align-items:center;}
+  .muted{color:var(--txt-faint);font-size:12px;}
+  .viewbar{display:flex;gap:8px;align-items:center;margin:4px 0 14px;flex-wrap:wrap;}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:18px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-size:11px;}
+  .seg span{padding:6px 12px;cursor:pointer;color:var(--txt-faint);}
+  .seg span.on{background:var(--accent);color:#04140f;font-weight:600;}
+  .group{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 16px;margin-bottom:11px;}
+  .ghead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .gtitle{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:14px;}
+  .gsub{color:var(--txt-dim);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+  .gbtn{margin-left:auto;}
+  .members{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+  .mrow{display:flex;align-items:center;gap:9px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;flex-wrap:wrap;}
+  .tier{font-family:'Space Mono',monospace;font-weight:700;font-size:11px;padding:1px 7px;border-radius:6px;border:1px solid;}
+  .t-P0{color:var(--p0);border-color:var(--p0)}.t-P1{color:var(--p1);border-color:var(--p1)}.t-P2{color:var(--p2);border-color:var(--p2)}.t-P3{color:var(--p3);border-color:var(--p3)}
+  .kevtag{font-size:9.5px;color:var(--kev);border:1px solid var(--kev);border-radius:5px;padding:0 5px;}
+  .status{font-size:10.5px;padding:1px 7px;border-radius:6px;border:1px solid var(--line);color:var(--txt-faint);}
+  .st-mitigated{color:var(--accent);border-color:var(--accent)}
+  .st-vulnerable{color:var(--p0);border-color:var(--p0)}
+  .st-not_applicable{color:var(--txt-dim);border-color:var(--txt-dim)}
+  .st-verify{color:var(--p1);border-color:var(--p1)}
+  .mnote{color:var(--txt-dim);font-size:11.5px;flex-basis:100%;padding-left:2px;}
+  .modal-back{position:fixed;inset:0;background:rgba(5,7,10,.78);backdrop-filter:blur(3px);z-index:60;display:none;align-items:flex-end;justify-content:center;}
+  .modal-back.open{display:flex;}
+  .sheet{background:var(--bg);border:1px solid var(--line);border-radius:16px 16px 0 0;width:100%;max-width:780px;max-height:92vh;display:flex;flex-direction:column;}
+  @media(min-width:780px){.modal-back{align-items:center}.sheet{border-radius:16px;max-height:88vh}}
+  .sheet-head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+  .sheet-head .x{margin-left:auto;cursor:pointer;color:var(--txt-faint);font-size:20px;line-height:1;background:none;border:none;}
+  .chat{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:11px;}
+  .msg{max-width:88%;padding:10px 13px;border-radius:12px;font-size:13.5px;white-space:pre-wrap;word-wrap:break-word;}
+  .msg.user{align-self:flex-end;background:var(--accent);color:#04140f;}
+  .msg.ai{align-self:flex-start;background:var(--panel-2);border:1px solid var(--line);}
+  .msg.sys{align-self:center;color:var(--txt-faint);font-size:12px;font-family:'IBM Plex Mono',monospace;background:none;}
+  .verdicts{align-self:flex-start;display:flex;gap:7px;flex-wrap:wrap;max-width:92%;}
+  .verdicts button{font-size:11px;padding:5px 9px;}
+  .compose{border-top:1px solid var(--line);padding:12px 14px;display:flex;gap:9px;align-items:flex-end;}
+  .compose textarea{min-height:42px;max-height:150px;}
+  .pill{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--txt-faint);align-self:center;}
+  footer{margin-top:34px;padding:18px 0 40px;border-top:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt-faint);line-height:1.7;}
+  footer a{color:var(--accent);text-decoration:none;}
+  .story{max-width:730px;margin:8px 0 24px;color:var(--txt-dim);font-size:15px;}
+  .story p{margin:0 0 13px;}
+  .story b{color:var(--txt);}
+  .signals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 24px;}
+  @media(max-width:680px){.signals{grid-template-columns:1fr}}
+  .sig{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;}
+  .sig-h{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;margin:0 0 6px;color:var(--txt);}
+  .sig-b{font-size:13px;color:var(--txt-dim);line-height:1.5;}
+  .signals .sig:nth-child(1){border-top:3px solid var(--accent)}
+  .signals .sig:nth-child(2){border-top:3px solid var(--op)}
+  .signals .sig:nth-child(3){border-top:3px solid var(--p3)}
+  .signals .sig:nth-child(1) .sig-h{color:var(--accent)}
+  .signals .sig:nth-child(2) .sig-h{color:var(--op)}
+  .signals .sig:nth-child(3) .sig-h{color:var(--p3)}
+  .mission{border-left:3px solid var(--accent);padding:5px 0 5px 16px;margin:0 0 22px;font-size:15px;color:var(--txt);max-width:730px;}
+  .stepsH{font-family:'Space Mono',monospace;font-size:18px;margin:0 0 11px;}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 18px;}
+  @media(max-width:680px){.steps{grid-template-columns:1fr}}
+  .step{display:flex;gap:11px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px 15px;}
+  .snum{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;color:#04140f;}
+  .step:nth-child(1) .snum{background:var(--accent)}
+  .step:nth-child(2) .snum{background:var(--op)}
+  .step:nth-child(3) .snum{background:var(--p3)}
+  .step b{display:block;font-size:13.5px;color:var(--txt);margin-bottom:2px;}
+  .step span{font-size:12.5px;color:var(--txt-dim);line-height:1.45;}
+  .trust{font-size:13px;color:var(--txt-dim);margin:0 0 24px;}
+  .trust a,.story a,.banner a{color:var(--accent);font-weight:600;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+  @keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+  .hero{position:relative;min-height:86vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;padding:54px 22px;}
+  .dotfield{position:absolute;inset:0;z-index:0;}
+  .dotfield i{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--txt-faint);opacity:.2;}
+  .dotfield i.hot{background:var(--accent);opacity:1;box-shadow:0 0 13px var(--accent);width:6px;height:6px;animation:pulse 2.8s infinite;}
+  .hero::after{content:"";position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse 60% 50% at 50% 45%,transparent 30%,var(--bg) 90%);}
+  .hero-inner{position:relative;z-index:2;max-width:920px;}
+  .hero .eyebrow{font-size:12px;letter-spacing:.28em;margin-bottom:22px;opacity:0;animation:fu .6s .1s forwards;}
+  .hero h1{font-family:'Space Mono',monospace;font-weight:700;font-size:clamp(38px,7.4vw,82px);line-height:1.05;margin:0;letter-spacing:-.01em;}
+  .hero h1 .b1{display:block;color:var(--txt);opacity:0;animation:fu .6s .22s forwards;}
+  .hero h1 .b2{display:block;color:var(--accent);opacity:0;animation:fu .6s .36s forwards;}
+  .hero .sub{max-width:660px;margin:26px auto 0;font-size:clamp(15px,1.8vw,19px);color:var(--txt-dim);line-height:1.6;opacity:0;animation:fu .6s .52s forwards;}
+  .hero .cta{margin-top:34px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fu .6s .68s forwards;}
+  .hero .cta button{padding:14px 22px;font-size:13px;border-radius:9px;text-transform:uppercase;letter-spacing:.07em;}
+  .scrollcue{position:absolute;bottom:20px;left:50%;color:var(--txt-faint);font-size:20px;z-index:2;animation:bob 1.8s infinite;}
+  .hide{display:none!important;}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="wrap"><div class="row">
+  <div class="brand"><span class="dot"></span><span>Fix<span class="ac">Few</span></span></div>
+  <div class="tb-right">
+    <a class="back" id="backLink" href="https://silvestroparisi.github.io/FirstFew/"></a>
+    <div class="themesw"><span data-t="light" onclick="setTheme('light')">☀</span><span data-t="dark" onclick="setTheme('dark')">☾</span></div>
+    <div class="langsw"><span data-l="it" onclick="setLang('it')">IT</span><span data-l="en" onclick="setLang('en')">EN</span></div>
+  </div>
+</div></div></div>
+
+<section class="hero">
+  <div class="dotfield" id="dotfield"></div>
+  <div class="hero-inner">
+    <div class="eyebrow" id="heroEyebrow"></div>
+    <h1><span class="b1" id="heroH1"></span><span class="b2" id="heroH1b"></span></h1>
+    <p class="sub" id="heroSub"></p>
+    <div class="cta">
+      <button class="primary" id="heroCta1" onclick="goTo('start')"></button>
+      <button id="heroCta2" onclick="goTo('stepsH')"></button>
+    </div>
+  </div>
+  <div class="scrollcue">↓</div>
+</section>
+
+<div class="wrap">
+  <div class="story">
+    <p id="story1"></p>
+    <p id="story2"></p>
+  </div>
+
+  <div class="signals">
+    <div class="sig"><div class="sig-h" id="sig1h"></div><div class="sig-b" id="sig1b"></div></div>
+    <div class="sig"><div class="sig-h" id="sig2h"></div><div class="sig-b" id="sig2b"></div></div>
+    <div class="sig"><div class="sig-h" id="sig3h"></div><div class="sig-b" id="sig3b"></div></div>
+  </div>
+
+  <div class="mission" id="mission"></div>
+
+  <div class="stepsH" id="stepsH"></div>
+  <div class="steps">
+    <div class="step"><span class="snum">1</span><div><b id="st1h"></b><span id="st1b"></span></div></div>
+    <div class="step"><span class="snum">2</span><div><b id="st2h"></b><span id="st2b"></span></div></div>
+    <div class="step"><span class="snum">3</span><div><b id="st3h"></b><span id="st3b"></span></div></div>
+  </div>
+  <p class="trust" id="trust"></p>
+
+  <div class="banner" id="privacyBan" style="border-left-color:var(--accent)"><span>◆</span><span id="privacy"></span></div>
+
+  <div class="card" id="start">
+    <h2 id="setH"></h2>
+    <p class="muted" id="setSub" style="margin:2px 0 14px"></p>
+    <div class="grid">
+      <div class="field"><label class="fld" id="lProvider"></label>
+        <select id="provider" onchange="onProvider()"></select></div>
+      <div class="field" id="modelWrap"><label class="fld" id="lModel"></label>
+        <input type="text" id="model" placeholder="model"></div>
+      <div class="field hide" id="wlModelWrap"><label class="fld" id="lWlModel"></label>
+        <select id="wlModel"></select></div>
+    </div>
+    <div class="field" id="baseWrap"><label class="fld" id="lBase"></label>
+      <input type="text" id="base" placeholder="https://…/v1"></div>
+    <div class="field" id="keyWrap"><label class="fld" id="lKey"></label>
+      <input type="password" id="apikey" placeholder="sk-… (in memory only)" autocomplete="off"></div>
+    <div class="banner hide" id="wlNote" style="border-left-color:var(--accent);margin:2px 0 12px"><span>◆</span><span id="wlNoteTxt"></span></div>
+    <label style="font-size:12.5px;color:var(--txt-dim);display:flex;gap:8px;align-items:center;cursor:pointer">
+      <input type="checkbox" id="redact" checked style="width:auto"> <span id="lRedact"></span></label>
+    <p class="muted" id="redactHelp" style="margin:6px 0 0;line-height:1.5"></p>
+  </div>
+
+  <div class="card">
+    <h2 id="impH"></h2>
+    <p class="muted" id="impSub" style="margin:2px 0 14px"></p>
+    <div class="row-btns">
+      <button id="btnDemo" onclick="loadDemoFX()"></button>
+      <label class="primary" id="btnImport" for="csv" style="padding:9px 14px;border-radius:8px;display:inline-block"></label>
+      <input type="file" id="csv" accept=".csv" onchange="loadCSV(event)">
+      <button id="btnExport" onclick="exportReport()"></button>
+      <span class="muted" id="impCount"></span>
+    </div>
+    <p class="muted hide" id="demoNote" style="margin:10px 0 0;line-height:1.5"></p>
+  </div>
+
+  <div class="viewbar hide" id="viewbar">
+    <span class="muted" id="viewLabel"></span>
+    <div class="seg" id="viewSeg">
+      <span data-v="flat" onclick="setView('flat')"></span>
+      <span data-v="asset" onclick="setView('asset')"></span>
+      <span data-v="cve" onclick="setView('cve')"></span>
+    </div>
+  </div>
+
+  <div id="list"></div>
+
+  <footer id="footer"></footer>
+</div>
+
+<div class="modal-back" id="sheet" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet">
+    <div class="sheet-head">
+      <div><div class="gtitle" id="shTitle"></div><div class="gsub" id="shSub"></div></div>
+      <button class="x" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="chat" id="chat"></div>
+    <div class="compose">
+      <textarea id="compose" rows="1" placeholder="…"></textarea>
+      <button class="primary" id="btnSend" onclick="send()"></button>
+    </div>
+  </div>
+</div>
+
+<script>
+const byId=id=>document.getElementById(id);
+let LANG='en',THEME='dark',VIEW='flat';
+
+const I18N={
+ en:{
+  heroEyebrow:`GUIDED VULNERABILITY REMEDIATION`,
+  heroH1:`Stop patching everything.`,
+  heroH1b:`Fix the few that matter.`,
+  cta1:`Start →`, cta2:`How it works`,
+  lead:`Knowing what to fix is half the job. FixFew does the other half with you — is it really exploitable on your gear, and the least-disruptive way to close it. Free, private, your own AI.`,
+  story1:`Prioritizing isn't fixing. The real work comes after: figuring out whether a vulnerability is actually exploitable on <b>your</b> asset or already mitigated, and choosing the least-disruptive fix — often a config change, not necessarily an upgrade. "Patch everything" isn't a strategy; it's a way to never finish.`,
+  story2:`That's why a small AI model already runs inside your browser. By default, nothing you paste — configs, command output — ever leaves your machine. If you want sharper reasoning you can plug in your own API key for a more powerful model: that's <b>your</b> choice, and the key is never stored. And it's <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">open source</a>, so you can read exactly what it does.`,
+  sig1h:`Verifies, doesn't assume`, sig1b:`For each CVE it checks whether your asset is really exploitable or already mitigated — a high CVSS can still be irrelevant to you.`,
+  sig2h:`For everyone`, sig2b:`You don't need a big security team or an expensive platform — you only need to know your own perimeter. The tool does the rest, whether you're an enterprise or a small business.`,
+  sig3h:`Private by default`, sig3b:`A local model is built in — your data stays on your machine. Reach for your own key only when you want more power.`,
+  mission:`FixFew exists so that good remediation isn't gated behind expensive platforms — or behind a willingness to ship your network's secrets to someone else's cloud. Free, open, and yours.`,
+  stepsH:`How it works`,
+  st1h:`Pick your AI.`, st1b:` A local model is ready in your browser — no key. Add your own key only if you want a more powerful model.`,
+  st2h:`Import your list.`, st2b:` Drop in the CSV you exported from FirstFew. It never leaves your browser.`,
+  st3h:`Assist & tag.`, st3b:` Work per asset or per CVE: it verifies each one, consolidates the fix, and tags the status. Export the report when you're done.`,
+  trust:`Don't trust it? You don't have to — it's open source. Read every line on <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">GitHub</a>.`,
+  privacy:`<b>By default a model runs inside your browser</b>, so nothing you paste leaves your device. Only if <b>you</b> choose to load your own API key — for a more capable model — does your data go to that provider, and even then the key lives in memory only: never stored, never sent anywhere else. Don't take our word for it — it's <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">open source</a>.`,
+  back:`← FirstFew`,
+  setH:`1 · Your AI`, setSub:`A local model is ready — no key needed. Want sharper reasoning? Add your own key for a frontier model; it's kept in memory only.`,
+  lProvider:`Provider`, lModel:`Model`, lBase:`Endpoint (base URL)`, lKey:`API key`,
+  lRedact:`Redact obvious secrets (passwords, SNMP communities, keys) before sending`,
+  redactHelp:`Masks passwords, SNMP communities, tokens and keys in whatever you paste, before it's sent. With the in-browser model nothing leaves your device anyway — this matters most when you've loaded your own key.`,
+  lWlModel:`In-browser model`,
+  wlNote:`No key, and nothing leaves your device — like FirstFew. The model runs in your browser on your GPU. The first time it's downloaded (≈1–5 GB depending on the model), then cached offline. Trade-offs to know: it's <b>much slower</b> than a cloud API and the speed depends entirely on your computer; it needs a <b>WebGPU browser</b> (Chrome / Edge / recent Safari); and a small local model is <b>weaker at complex reasoning</b>, so treat its verdicts as a first draft. For serious analysis, use a frontier model with your own key above.`,
+  noWebGPU:`This browser has no WebGPU — use Chrome or Edge, or pick a provider with a key.`,
+  wlInit:`Loading the in-browser model (the first run downloads it)…`,
+  impH:`2 · Your findings`, impSub:`Upload the CSV you exported from FirstFew. It stays in your browser.`,
+  btnImport:`Import FirstFew CSV ↑`, btnExport:`Export remediation report ↓`,
+  btnDemo:`Load demo data ↻`,
+  demoNote:`Example findings — real CVEs, example assets — already prioritized. Perfect for trying the assistant (give the in-browser model a go). They open as a flat list; switch to "Asset" to see host-rhel-19 with several CVEs (which single upgrade fixes the most), or "CVE" to see Log4Shell across three servers and Heartbleed across two.`,
+  count:n=>`${n} findings loaded`,
+  viewLabel:`Group by:`, vAsset:`Asset`, vCve:`CVE`, vFlat:`Flat`,
+  assistAsset:n=>`Assist asset · ${n} CVE${n>1?'s':''}`, assistCve:n=>`Assist CVE · ${n} asset${n>1?'s':''}`, assistOne:`Assist`,
+  footer:`Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · CVE data: NVD · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">github.com/silvestroparisi/FixFew</a>`,
+  send:`Send`, composePh:`Answer, or paste a config / command output…`,
+  noKey:`Set your provider and API key in section 1 first.`,
+  grounding:`Reading CVE details…`, groundFail:`Some CVE details couldn't be fetched — the assistant will rely on the model's knowledge for those.`,
+  thinking:`Thinking…`,
+  st:{verify:`To verify`,vulnerable:`Vulnerable`,mitigated:`Mitigated`,not_applicable:`Not applicable`,none:`Not assessed`},
+  apply:`Apply`, applyAll:`Apply all`,
+  redactedNote:`(secrets redacted before sending)`,
+  beginOne:`Begin: briefly explain the vulnerability, then tell me what you need (model, OS/firmware, config) to decide whether this asset is actually vulnerable.`,
+  beginAsset:`Begin: this is one asset with several CVEs. Ask me once for its exact model and OS/firmware, then tell me which configs/outputs you need to check each CVE.`,
+  beginCve:`Begin: this is one CVE across several assets. Explain it once and tell me what to check on each asset to confirm whether it applies.`,
+  reportTitle:`FixFew — Remediation status`, gen:`Generated`, meth:`Findings imported from FirstFew. Status and notes are your own conclusions, assisted by AI — verify against the vendor advisory before acting.`,
+  cols:['#','Priority','CVE','Asset','Status','Note'],
+  noFindings:`Nothing to export yet — import a CSV first.`
+ },
+ it:{
+  heroEyebrow:`REMEDIATION GUIDATA · OPEN SOURCE`,
+  heroH1:`Smetti di patchare tutto.`,
+  heroH1b:`Sistema i pochi che contano.`,
+  cta1:`Inizia →`, cta2:`Come funziona`,
+  lead:`Sapere cosa sistemare è metà del lavoro. FixFew fa l'altra metà con te — è davvero sfruttabile sui tuoi apparati, e qual è il modo meno invasivo per chiuderla. Gratis, privato, con la tua AI.`,
+  story1:`Dare priorità non è sistemare. Il lavoro vero arriva dopo: capire se una vulnerabilità è davvero sfruttabile sul <b>tuo</b> asset o se è già mitigata, e scegliere il fix meno invasivo — spesso una modifica di configurazione, non per forza un aggiornamento. "Patchare tutto" non è una strategia: è un modo per non finire mai.`,
+  story2:`Per questo dentro FixFew gira già un piccolo modello AI nel tuo browser. Di default niente di ciò che incolli — config, output di comandi — lascia la tua macchina. Se vuoi un ragionamento più affilato puoi collegare la tua chiave API verso un modello più potente: è una <b>tua</b> scelta, e la chiave non viene mai memorizzata. Ed è <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">open source</a>, così puoi leggere esattamente cosa fa.`,
+  sig1h:`Verifica, non dà per scontato`, sig1b:`Per ogni CVE controlla se il tuo asset è davvero sfruttabile o già mitigato — un CVSS alto può comunque non riguardarti.`,
+  sig2h:`Per tutti`, sig2b:`Non ti serve un grande team di sicurezza né una piattaforma costosa — devi solo avere contezza del tuo perimetro. Al resto pensa il tool, che tu sia un'enterprise o un piccolo business.`,
+  sig3h:`Privato di default`, sig3b:`Un modello locale è già integrato — i tuoi dati restano sulla tua macchina. La tua chiave la usi solo quando vuoi più potenza.`,
+  mission:`FixFew esiste perché una buona remediation non sia riservata a chi può permettersi piattaforme costose — o a chi è disposto a mandare i segreti della propria rete nel cloud di qualcun altro. Gratuito, aperto, e tuo.`,
+  stepsH:`Come funziona`,
+  st1h:`Scegli la tua AI.`, st1b:` Un modello locale è pronto nel browser — niente chiave. Aggiungi la tua chiave solo se vuoi un modello più potente.`,
+  st2h:`Importa la lista.`, st2b:` Carica il CSV esportato da FirstFew. Non lascia mai il tuo browser.`,
+  st3h:`Assisti e tagga.`, st3b:` Lavori per asset o per CVE: verifica ognuna, consolida il fix e assegna lo stato. A fine lavoro esporti il report.`,
+  trust:`Non ti fidi? Non sei costretto — è open source. Leggi ogni riga su <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">GitHub</a>.`,
+  privacy:`<b>Di default un modello gira dentro il tuo browser</b>, quindi niente di ciò che incolli lascia il dispositivo. Solo se sei <b>tu</b> a caricare la tua chiave API — per un modello più capace — i tuoi dati vanno a quel provider, e anche allora la chiave resta solo in memoria: mai salvata, mai inviata altrove. Non fidarti sulla parola — è <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">open source</a>.`,
+  back:`← FirstFew`,
+  setH:`1 · La tua AI`, setSub:`Un modello locale è pronto — nessuna chiave. Vuoi un ragionamento più affilato? Aggiungi la tua chiave per un modello frontier; resta solo in memoria.`,
+  lProvider:`Provider`, lModel:`Modello`, lBase:`Endpoint (base URL)`, lKey:`Chiave API`,
+  lRedact:`Oscura i segreti evidenti (password, community SNMP, chiavi) prima di inviare`,
+  redactHelp:`Maschera password, community SNMP, token e chiavi in ciò che incolli, prima dell'invio. Col modello in-browser comunque niente lascia il dispositivo — conta soprattutto quando hai caricato la tua chiave.`,
+  lWlModel:`Modello in-browser`,
+  wlNote:`Nessuna chiave, e niente lascia il tuo dispositivo — come FirstFew. Il modello gira nel tuo browser, sulla tua GPU. La prima volta viene scaricato (≈1–5 GB a seconda del modello), poi resta in cache offline. Compromessi da sapere: è <b>molto più lento</b> di un'API cloud e la velocità dipende interamente dal tuo computer; serve un <b>browser con WebGPU</b> (Chrome / Edge / Safari recente); e un modello locale piccolo è <b>più debole sul ragionamento complesso</b>, quindi considera i suoi verdetti come una prima bozza. Per l'analisi seria, usa un modello frontier con la tua chiave qui sopra.`,
+  noWebGPU:`Questo browser non ha WebGPU — usa Chrome o Edge, oppure scegli un provider con chiave.`,
+  wlInit:`Carico il modello in-browser (al primo avvio lo scarica)…`,
+  impH:`2 · I tuoi finding`, impSub:`Carica il CSV esportato da FirstFew. Resta nel tuo browser.`,
+  btnImport:`Importa CSV di FirstFew ↑`, btnExport:`Esporta report remediation ↓`,
+  btnDemo:`Carica dati demo ↻`,
+  demoNote:`Finding di esempio — CVE reali, asset d'esempio — già prioritizzati. Perfetti per provare l'assistente (dai una chance al modello in-browser). Si aprono come lista piatta; passa ad "Asset" per host-rhel-19 con più CVE (quale upgrade ne risolve di più), o a "CVE" per vedere Log4Shell su tre server e Heartbleed su due.`,
+  count:n=>`${n} finding caricati`,
+  viewLabel:`Raggruppa per:`, vAsset:`Asset`, vCve:`CVE`, vFlat:`Singoli`,
+  assistAsset:n=>`Assisti asset · ${n} CVE`, assistCve:n=>`Assisti CVE · ${n} asset`, assistOne:`Assisti`,
+  footer:`Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · dati CVE: NVD · <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">github.com/silvestroparisi/FixFew</a>`,
+  send:`Invia`, composePh:`Rispondi, o incolla una config / l'output di un comando…`,
+  noKey:`Imposta prima provider e chiave API nella sezione 1.`,
+  grounding:`Leggo i dettagli delle CVE…`, groundFail:`Alcuni dettagli CVE non sono stati recuperati — per quelli l'assistente userà la conoscenza del modello.`,
+  thinking:`Sto ragionando…`,
+  st:{verify:`Da verificare`,vulnerable:`Vulnerabile`,mitigated:`Mitigato`,not_applicable:`Non applicabile`,none:`Non valutato`},
+  apply:`Applica`, applyAll:`Applica tutti`,
+  redactedNote:`(segreti oscurati prima dell'invio)`,
+  beginOne:`Inizia: spiega in breve la vulnerabilità, poi dimmi cosa ti serve (modello, OS/firmware, config) per capire se questo asset è davvero vulnerabile.`,
+  beginAsset:`Inizia: questo è un asset con più CVE. Chiedimi una volta sola modello esatto e OS/firmware, poi dimmi quali config/output ti servono per controllare ogni CVE.`,
+  beginCve:`Inizia: questa è una CVE su più asset. Spiegala una volta e dimmi cosa controllare su ogni asset per confermare se si applica.`,
+  reportTitle:`FixFew — Stato remediation`, gen:`Generato il`, meth:`Finding importati da FirstFew. Stato e note sono tue conclusioni, assistite dall'AI — verifica sull'advisory del vendor prima di agire.`,
+  cols:['#','Priorità','CVE','Asset','Stato','Nota'],
+  noFindings:`Niente da esportare — importa prima un CSV.`
+ }
+};
+const T=()=>I18N[LANG];
+
+const PROVIDERS={
+ openai:{label:'OpenAI',base:'https://api.openai.com/v1',model:'gpt-4o-mini',kind:'openai',key:true,editBase:false},
+ anthropic:{label:'Anthropic (Claude)',base:'https://api.anthropic.com/v1',model:'claude-3-5-sonnet-latest',kind:'anthropic',key:true,editBase:false},
+ gemini:{label:'Google Gemini',base:'https://generativelanguage.googleapis.com/v1beta/openai',model:'gemini-2.0-flash',kind:'openai',key:true,editBase:false},
+ openrouter:{label:'OpenRouter',base:'https://openrouter.ai/api/v1',model:'openai/gpt-4o-mini',kind:'openai',key:true,editBase:true},
+ local:{label:'Local (Ollama / LM Studio)',base:'http://localhost:11434/v1',model:'llama3.1',kind:'openai',key:false,editBase:true},
+ custom:{label:'Custom (OpenAI-compatible)',base:'',model:'',kind:'openai',key:true,editBase:true},
+ webllm:{label:'In-browser · WebLLM (no key)',base:'',model:'',kind:'webllm',key:false,editBase:false}
+};
+
+function applyLang(){const t=T();document.documentElement.lang=LANG;
+ document.querySelectorAll('.langsw span').forEach(s=>s.classList.toggle('on',s.dataset.l===LANG));
+ byId('heroEyebrow').textContent=t.heroEyebrow;byId('heroH1').textContent=t.heroH1;byId('heroH1b').textContent=t.heroH1b;byId('heroSub').textContent=t.lead;byId('heroCta1').textContent=t.cta1;byId('heroCta2').textContent=t.cta2;byId('privacy').innerHTML=t.privacy;
+ byId('story1').innerHTML=t.story1;byId('story2').innerHTML=t.story2;byId('mission').textContent=t.mission;
+ byId('sig1h').textContent=t.sig1h;byId('sig1b').textContent=t.sig1b;byId('sig2h').textContent=t.sig2h;byId('sig2b').textContent=t.sig2b;byId('sig3h').textContent=t.sig3h;byId('sig3b').textContent=t.sig3b;
+ byId('stepsH').textContent=t.stepsH;byId('trust').innerHTML=t.trust;
+ byId('st1h').textContent=t.st1h;byId('st1b').textContent=t.st1b;byId('st2h').textContent=t.st2h;byId('st2b').textContent=t.st2b;byId('st3h').textContent=t.st3h;byId('st3b').textContent=t.st3b;
+ byId('backLink').textContent=t.back;
+ byId('setH').textContent=t.setH;byId('setSub').textContent=t.setSub;
+ byId('lProvider').textContent=t.lProvider;byId('lModel').textContent=t.lModel;byId('lBase').textContent=t.lBase;byId('lKey').textContent=t.lKey;byId('lRedact').textContent=t.lRedact;byId('redactHelp').textContent=t.redactHelp;
+ byId('lWlModel').textContent=t.lWlModel;byId('wlNoteTxt').innerHTML=t.wlNote;
+ byId('impH').textContent=t.impH;byId('impSub').textContent=t.impSub;byId('btnImport').textContent=t.btnImport;byId('btnExport').textContent=t.btnExport;
+ byId('btnDemo').textContent=t.btnDemo;byId('demoNote').textContent=t.demoNote;
+ byId('btnSend').textContent=t.send;byId('compose').placeholder=t.composePh;
+ byId('footer').innerHTML=t.footer;
+ byId('viewLabel').textContent=t.viewLabel;
+ byId('impCount').textContent=DATA.length?t.count(DATA.length):'';
+ document.querySelectorAll('#viewSeg span').forEach(s=>{s.textContent=s.dataset.v==='asset'?t.vAsset:s.dataset.v==='cve'?t.vCve:t.vFlat;s.classList.toggle('on',s.dataset.v===VIEW);});
+ renderList();
+}
+function setLang(l){LANG=l;applyLang();}
+function applyTheme(){document.documentElement.dataset.theme=THEME;document.querySelectorAll('.themesw span').forEach(s=>s.classList.toggle('on',s.dataset.t===THEME));}
+function setTheme(x){THEME=x;applyTheme();}
+function setView(v){VIEW=v;document.querySelectorAll('#viewSeg span').forEach(s=>s.classList.toggle('on',s.dataset.v===VIEW));renderList();}
+
+function onProvider(){const k=byId('provider').value,p=PROVIDERS[k],wl=(k==='webllm');byId('base').value=p.base;if(!wl)byId('model').value=p.model;
+ byId('keyWrap').classList.toggle('hide',!p.key||wl);
+ byId('baseWrap').classList.toggle('hide',!p.editBase||wl);
+ byId('modelWrap').classList.toggle('hide',wl);
+ byId('wlModelWrap').classList.toggle('hide',!wl);
+ byId('wlNote').classList.toggle('hide',!wl);
+ if(wl)loadWLModels();}
+function initProviders(){const sel=byId('provider');sel.innerHTML='';
+ Object.entries(PROVIDERS).forEach(([k,v])=>{const o=document.createElement('option');o.value=k;o.textContent=v.label;sel.appendChild(o);});
+ sel.value='webllm';onProvider();}
+
+// ---------- data ----------
+let DATA=[];
+const TC={P0:'#ff3b53',P1:'#ff9a3c',P2:'#ffd23c',P3:'#3da6ff'};
+const TORDER={P0:0,P1:1,P2:2,P3:3};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+function splitCsvLine(line){const out=[];let cur='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];
+ if(q){if(ch==='"'){if(line[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=ch;}
+ else{if(ch===','){out.push(cur);cur='';}else if(ch==='"')q=true;else cur+=ch;}}
+ out.push(cur);return out;}
+function parseCSV(txt){const L=txt.trim().split(/\r?\n/);if(!L.length)return[];
+ const h=L[0].split(',').map(x=>x.trim().toLowerCase()),idx=n=>h.indexOf(n),o=[];
+ for(let i=1;i<L.length;i++){const c=splitCsvLine(L[i]);if(!c.length||!c[0]||c[0].trim().startsWith('#'))continue;
+  const g=n=>{const j=idx(n);return j>=0?(c[j]||'').trim():'';};
+  o.push({cve:(g('cve')||c[0]).trim(),tier:(g('priority')||g('tier')||'P3').toUpperCase(),
+   asset:g('asset')||'—',type:g('type')||'',zone:g('zone')||'',criticality:g('criticality')||'',
+   cvss:g('cvss'),epss:g('epss'),kev:/^(1|true|yes|y|kev)$/i.test(g('kev')),av:g('av'),
+   status:'none',note:''});}
+ return o;}
+function loadCSV(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=e=>{DATA=parseCSV(e.target.result);SESSIONS={};byId('impCount').textContent=DATA.length?T().count(DATA.length):'';
+  byId('viewbar').classList.toggle('hide',!DATA.length);renderList();};
+ r.readAsText(f);}
+
+const DEMO_FX=[
+ {tier:'P0',cve:'CVE-2024-3400',asset:'edge-fw-01',type:'appliance',zone:'internet',criticality:'crown',cvss:'10.0',epss:'0.943',kev:true,av:'N'},
+ {tier:'P0',cve:'CVE-2023-20198',asset:'core-rtr-01',type:'network-core',zone:'internal',criticality:'crown',cvss:'10.0',epss:'0.940',kev:true,av:'N'},
+ {tier:'P0',cve:'CVE-2023-4966',asset:'netscaler-01',type:'appliance',zone:'internet',criticality:'crown',cvss:'9.4',epss:'0.943',kev:true,av:'N'},
+ {tier:'P0',cve:'CVE-2017-0144',asset:'file-srv-08',type:'server',zone:'internal',criticality:'important',cvss:'8.1',epss:'0.943',kev:true,av:'N'},
+ {tier:'P0',cve:'CVE-2025-31324',asset:'sap-erp-01',type:'server',zone:'internal',criticality:'crown',cvss:'10.0',epss:'0.315',kev:true,av:'N'},
+ {tier:'P0',cve:'CVE-2021-44228',asset:'app-java-01',type:'server',zone:'internet',criticality:'important',cvss:'10.0',epss:'0.944',kev:true,av:'N'},
+ {tier:'P0',cve:'CVE-2021-44228',asset:'app-java-02',type:'server',zone:'internal',criticality:'important',cvss:'10.0',epss:'0.944',kev:true,av:'N'},
+ {tier:'P0',cve:'CVE-2021-44228',asset:'app-java-03',type:'server',zone:'dmz',criticality:'normal',cvss:'10.0',epss:'0.944',kev:true,av:'N'},
+ {tier:'P2',cve:'CVE-2016-5195',asset:'host-rhel-19',type:'server',zone:'internal',criticality:'important',cvss:'7.8',epss:'0.939',kev:false,av:'L'},
+ {tier:'P2',cve:'CVE-2022-3602',asset:'host-rhel-19',type:'server',zone:'internal',criticality:'important',cvss:'7.5',epss:'0.835',kev:false,av:'N'},
+ {tier:'P2',cve:'CVE-2023-38545',asset:'host-rhel-19',type:'server',zone:'internal',criticality:'important',cvss:'9.8',epss:'0.267',kev:false,av:'N'},
+ {tier:'P1',cve:'CVE-2014-0160',asset:'legacy-web-03',type:'server',zone:'dmz',criticality:'normal',cvss:'7.5',epss:'0.945',kev:false,av:'N'},
+ {tier:'P2',cve:'CVE-2014-0160',asset:'legacy-web-04',type:'server',zone:'internal',criticality:'normal',cvss:'7.5',epss:'0.945',kev:false,av:'N'},
+ {tier:'P3',cve:'CVE-2025-21001',asset:'mobile-fleet-12',type:'endpoint',zone:'management',criticality:'low',cvss:'6.2',epss:'0.0007',kev:false,av:'L'}
+];
+function loadDemoFX(){DATA=DEMO_FX.map(r=>Object.assign({},r,{status:'none',note:''}));SESSIONS={};
+ byId('impCount').textContent=T().count(DATA.length);byId('viewbar').classList.remove('hide');
+ byId('demoNote').textContent=T().demoNote;byId('demoNote').classList.remove('hide');
+ VIEW='flat';document.querySelectorAll('#viewSeg span').forEach(s=>s.classList.toggle('on',s.dataset.v===VIEW));
+ renderList();byId('viewbar').scrollIntoView({behavior:'smooth',block:'start'});}
+
+function groups(by){const m=new Map();
+ DATA.forEach((f,i)=>{const k=by==='asset'?f.asset:f.cve;if(!m.has(k))m.set(k,[]);m.get(k).push(i);});
+ // sort groups by best (lowest) tier inside
+ return [...m.entries()].sort((a,b)=>Math.min(...a[1].map(i=>TORDER[DATA[i].tier]??9))-Math.min(...b[1].map(i=>TORDER[DATA[i].tier]??9)));
+}
+function stClass(s){return s==='none'?'':'st-'+s;}
+function stLabel(s){return s==='none'?T().st.none:T().st[s]||s;}
+function memberRow(i){const f=DATA[i];
+ return `<div class="mrow"><span class="tier t-${f.tier}">${f.tier}</span>`+
+  `<span>${esc(VIEW==='cve'?f.asset:f.cve)}</span>`+
+  (f.kev?'<span class="kevtag">KEV</span>':'')+
+  (f.cvss?`<span class="muted">CVSS ${esc(f.cvss)}</span>`:'')+
+  `<span class="status ${stClass(f.status)}">${esc(stLabel(f.status))}</span>`+
+  (f.note?`<div class="mnote">${esc(f.note)}</div>`:'')+
+  `</div>`;}
+function renderList(){const t=T(),host=byId('list');
+ if(!DATA.length){host.innerHTML='';return;}
+ if(VIEW==='flat'){
+  const order=DATA.map((f,i)=>i).sort((a,b)=>(TORDER[DATA[a].tier]??9)-(TORDER[DATA[b].tier]??9));
+  host.innerHTML=order.map(i=>{const f=DATA[i];
+   return `<div class="group"><div class="ghead"><span class="tier t-${f.tier}">${f.tier}</span><span class="gtitle">${esc(f.cve)}</span>${f.kev?'<span class="kevtag">KEV</span>':''}<span class="gsub">${esc(f.asset)}</span><span class="status ${stClass(f.status)}">${esc(stLabel(f.status))}</span><button class="gbtn" onclick="openSheet('single','${escAttr(f.cve)}|${escAttr(f.asset)}')">${t.assistOne}</button></div>${f.note?`<div class="mnote" style="margin-top:8px">${esc(f.note)}</div>`:''}</div>`;
+  }).join('');return;}
+ const by=VIEW;const gs=groups(by);
+ host.innerHTML=gs.map(([key,idxs])=>{
+  const n=idxs.length;
+  const btn=by==='asset'?t.assistAsset(n):t.assistCve(n);
+  return `<div class="group"><div class="ghead"><span class="gtitle">${esc(key)}</span><span class="gsub">${by==='asset'?(n+' CVE'+(LANG==='en'&&n>1?'s':'')):(n+' '+(by==='cve'?'asset'+(LANG==='en'&&n>1?'s':''):''))}</span><button class="gbtn" onclick="openSheet('${by}','${escAttr(key)}')">${btn}</button></div><div class="members">${idxs.map(memberRow).join('')}</div></div>`;
+ }).join('');
+}
+function escAttr(s){return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;');}
+
+// ---------- secret redaction ----------
+function redactSecrets(text){let t=text;
+ t=t.replace(/(password|passwd|secret|pre-shared-key|psk|enable secret|wpa-psk|snmp-server community|community)\s*[:=]?\s*\S+/gi,(m,k)=>k+' ****REDACTED****');
+ t=t.replace(/(\b[A-Za-z0-9_-]*(?:secret|password|token|apikey|api[_-]?key)[A-Za-z0-9_-]*)\s*[:=]\s*\S+/gi,'$1 ****REDACTED****');
+ return t;}
+
+// ---------- CVE grounding ----------
+async function fetchCVE(cve){
+ try{const r=await fetch('https://services.nvd.nist.gov/rest/json/cves/2.0?cveId='+encodeURIComponent(cve));
+  if(!r.ok)return null;const j=await r.json();const v=j.vulnerabilities&&j.vulnerabilities[0]&&j.vulnerabilities[0].cve;if(!v)return null;
+  const desc=(v.descriptions||[]).filter(d=>d.lang==='en').map(d=>d.value)[0]||'';
+  const refs=(v.references||[]).map(x=>x.url).slice(0,8);
+  return {desc,refs,versions:extractVersions(v)};
+ }catch(e){return null;}
+}
+function extractVersions(v){const out=[];(v.configurations||[]).forEach(cfg=>(cfg.nodes||[]).forEach(node=>(node.cpeMatch||[]).forEach(c=>{
+  if(!c.vulnerable)return;const parts=(c.criteria||'').split(':');const prod=parts.slice(3,5).join(' ');
+  let r='';if(c.versionStartIncluding)r+=' ≥'+c.versionStartIncluding;if(c.versionStartExcluding)r+=' >'+c.versionStartExcluding;
+  if(c.versionEndIncluding)r+=' ≤'+c.versionEndIncluding;if(c.versionEndExcluding)r+=' <'+c.versionEndExcluding;
+  out.push(prod+(r||' (all listed)'));})));
+ return [...new Set(out)].slice(0,12);}
+
+// ---------- WebLLM (in-browser) ----------
+const WL_FALLBACK=['Llama-3.2-3B-Instruct-q4f16_1-MLC','Llama-3.2-1B-Instruct-q4f16_1-MLC','Phi-3.5-mini-instruct-q4f16_1-MLC','Qwen2.5-3B-Instruct-q4f16_1-MLC','Mistral-7B-Instruct-v0.3-q4f16_1-MLC','Llama-3.1-8B-Instruct-q4f16_1-MLC'];
+let WL_LIB=null,WL_ENGINE=null,WL_MODEL=null;
+function wlLabel(id){const m={'Llama-3.2-1B':' · ~0.9 GB · fastest','Llama-3.2-3B':' · ~2 GB · balanced','Phi-3.5-mini':' · ~2.4 GB','Qwen2.5-3B':' · ~2 GB','Mistral-7B':' · ~4 GB','Llama-3.1-8B':' · ~4.6 GB · best reasoning'};let s='';for(const k in m){if(id.indexOf(k)>=0)s=m[k];}return id+s;}
+function loadWLModels(){const sel=byId('wlModel');if(sel.options.length>1)return;
+ sel.innerHTML=WL_FALLBACK.map(id=>`<option value="${id}"${/3\.2-3B|3\.5-mini/i.test(id)?' selected':''}>${wlLabel(id)}</option>`).join('');}
+async function loadWebLLM(){if(!WL_LIB)WL_LIB=await import('https://esm.run/@mlc-ai/web-llm');return WL_LIB;}
+function wlProgress(txt){const s=CUR;if(!s)return;const i=s.chat.findIndex(m=>m.prog);if(i>=0)s.chat[i].content=txt;else s.chat.push({role:'_sys',content:txt,prog:true});renderChat();}
+async function getEngine(modelId){if(!navigator.gpu)throw new Error(T().noWebGPU);const lib=await loadWebLLM();
+ if(WL_ENGINE&&WL_MODEL===modelId)return WL_ENGINE;
+ wlProgress(T().wlInit);
+ WL_ENGINE=await lib.CreateMLCEngine(modelId,{initProgressCallback:r=>wlProgress((r&&r.text)?r.text:T().wlInit)});
+ WL_MODEL=modelId;return WL_ENGINE;}
+
+// ---------- LLM ----------
+function cfg(){const pv=byId('provider').value;return {provider:pv,base:byId('base').value.trim().replace(/\/$/,''),model:(pv==='webllm'?byId('wlModel').value:byId('model').value.trim()),key:byId('apikey').value.trim(),kind:PROVIDERS[pv].kind};}
+async function callLLM(system,history){const c=cfg();
+ if(c.kind==='webllm'){const engine=await getEngine(c.model);
+  const r=await engine.chat.completions.create({messages:[{role:'system',content:system}].concat(history),temperature:0.2,max_tokens:1500});
+  return r.choices&&r.choices[0]&&r.choices[0].message&&r.choices[0].message.content||'';}
+ if(c.kind==='anthropic'){
+  const r=await fetch(c.base+'/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':c.key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+   body:JSON.stringify({model:c.model,max_tokens:1500,system,messages:history})});
+  if(!r.ok)throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,200));
+  const j=await r.json();return (j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
+ }else{
+  const headers={'content-type':'application/json'};if(c.key)headers['authorization']='Bearer '+c.key;
+  if(c.provider==='openrouter'){headers['HTTP-Referer']=location.origin;headers['X-Title']='FixFew';}
+  const r=await fetch(c.base+'/chat/completions',{method:'POST',headers,
+   body:JSON.stringify({model:c.model,max_tokens:1500,temperature:0.2,messages:[{role:'system',content:system}].concat(history)})});
+  if(!r.ok)throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,200));
+  const j=await r.json();return j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content||'';
+ }
+}
+function groundBlock(s){let b='';s.members.forEach(i=>{const f=DATA[i];const g=s.grounds[f.cve];
+  b+=`\n- ${f.cve}`+(VIEW==='cve'?'':'')+` (CVSS ${f.cvss||'?'}, EPSS ${f.epss||'?'}, KEV ${f.kev?'yes':'no'}, AV ${f.av||'?'})`;
+  if(g&&g.desc)b+=`\n  desc: ${g.desc}`;
+  if(g&&g.versions&&g.versions.length)b+=`\n  affected versions: ${g.versions.join(' ; ')}`;
+  if(g&&g.refs&&g.refs.length)b+=`\n  refs: ${g.refs.slice(0,4).join(' , ')}`;});
+ return b;}
+function systemPrompt(s){const lang=LANG==='it'?'Italian':'English';
+ const assets=[...new Set(s.members.map(i=>DATA[i].asset))];const cves=[...new Set(s.members.map(i=>DATA[i].cve))];
+ let scope;
+ if(s.kind==='asset'){
+  scope=`You are remediating ONE asset that has several CVEs.
+Asset: ${assets[0]} | type ${DATA[s.members[0]].type||'?'} | zone ${DATA[s.members[0]].zone||'?'} | criticality ${DATA[s.members[0]].criticality||'?'}
+Ask the user ONCE for the exact model and OS/firmware version, plus any config needed.
+For EACH CVE below, verify INDIVIDUALLY whether THIS asset is actually exploitable or already mitigated (version in affected range? vulnerable feature/port enabled?). A CVE can be not_applicable or already mitigated even with a high CVSS.
+THEN consolidate: identify the single upgrade/version that fixes the MOST applicable CVEs, list which CVEs it clears, which still need a config change, and which are not applicable.`;
+ }else if(s.kind==='cve'){
+  scope=`You are analyzing ONE CVE that affects several assets.
+Explain the vulnerability and its preconditions ONCE. Then help verify, PER ASSET, whether it actually applies (affected version? vulnerable feature enabled?) and give the shared least-disruptive remediation.`;
+ }else{
+  scope=`You are remediating ONE finding (one CVE on one asset).
+Verify whether THIS asset is actually exploitable or already mitigated, then give the least-disruptive fix (a config change is often enough — don't default to an upgrade).`;
+ }
+ return `You are a precise vulnerability remediation analyst. Reply in ${lang}. Be concise and concrete. Interview the user a few targeted questions at a time and ask them to paste the specific config/command output you need.
+
+${scope}
+
+Findings in scope (authoritative data from NVD where available):${groundBlock(s)}
+
+Rules: never invent versions or facts; if unsure, say so and point to the vendor advisory in the refs. Frame everything as guidance to verify, not a guarantee.
+
+When you reach a conclusion for a finding, output one line per finding in EXACTLY this format (the app parses it):
+STATUS: <CVE-id> @ <asset> | <vulnerable|mitigated|not_applicable|verify> | <one short sentence: what to do / why>
+Use the exact asset name(s): ${assets.join(', ')}. Output a STATUS line only when you've actually concluded that finding; you can output several at once. Also give a short consolidated remediation plan in prose.`;}
+
+// ---------- sessions / sheet ----------
+let SESSIONS={};let CUR=null;
+function sessId(kind,key){return kind+'::'+key;}
+function membersFor(kind,key){if(kind==='single'){const[cve,asset]=key.split('|');return DATA.map((f,i)=>i).filter(i=>DATA[i].cve===cve&&DATA[i].asset===asset);}
+ return DATA.map((f,i)=>i).filter(i=>(kind==='asset'?DATA[i].asset:DATA[i].cve)===key);}
+async function openSheet(kind,key){const t=T();const id=sessId(kind,key);
+ if(!SESSIONS[id])SESSIONS[id]={kind,key,members:membersFor(kind,key),chat:[],grounds:{},started:false};
+ CUR=SESSIONS[id];const s=CUR;
+ const assets=[...new Set(s.members.map(i=>DATA[i].asset))],cves=[...new Set(s.members.map(i=>DATA[i].cve))];
+ byId('shTitle').textContent=kind==='cve'?cves[0]:assets[0];
+ byId('shSub').textContent=kind==='asset'?(cves.length+' CVE'):kind==='cve'?(assets.length+' asset'):(cves[0]+' · '+assets[0]);
+ byId('sheet').classList.add('open');
+ if(!s.started){s.started=true;renderChat();sysMsg(t.grounding);
+  let anyFail=false;for(const cv of cves){if(!s.grounds[cv]){const g=await fetchCVE(cv);if(g)s.grounds[cv]=g;else anyFail=true;}}
+  if(anyFail)sysMsg(t.groundFail);
+  const begin=kind==='asset'?t.beginAsset:kind==='cve'?t.beginCve:t.beginOne;
+  await turn(begin,true);
+ }else renderChat();
+}
+function closeSheet(){byId('sheet').classList.remove('open');}
+function sysMsg(txt){CUR.chat.push({role:'_sys',content:txt});renderChat();}
+function renderChat(){const s=CUR,host=byId('chat');
+ host.innerHTML=s.chat.map(m=>{
+  if(m.role==='_sys')return `<div class="msg sys">${esc(m.content)}</div>`;
+  if(m.role==='user')return `<div class="msg user">${esc(m.content)}</div>`;
+  const vs=parseStatuses(m.content);
+  let h=`<div class="msg ai">${esc(stripStatus(m.content))}</div>`;
+  if(vs.length){h+=`<div class="verdicts">`;
+   vs.forEach((v,k)=>{h+=`<button onclick="applyOne(${k})" data-st="${v.status}">${T().apply}: ${esc(v.cve)}@${esc(v.asset)} → ${esc(T().st[v.status]||v.status)}</button>`;});
+   if(vs.length>1)h+=`<button class="primary" onclick="applyAll()">${T().applyAll}</button>`;
+   h+=`</div>`;LASTVERDICTS=vs;}
+  return h;}).join('');
+ host.scrollTop=host.scrollHeight;}
+let LASTVERDICTS=[];
+function parseStatuses(text){const out=[];const re=/STATUS:\s*(CVE-\d{4}-\d+)\s*@\s*([^|]+?)\s*\|\s*(vulnerable|mitigated|not_applicable|verify)\s*\|\s*([^\n]+)/gi;let m;
+ while((m=re.exec(text||''))){out.push({cve:m[1].trim(),asset:m[2].trim(),status:m[3].toLowerCase(),note:m[4].trim()});}return out;}
+function stripStatus(text){return (text||'').replace(/STATUS:\s*CVE-\d{4}-\d+\s*@\s*[^|]+\|\s*(vulnerable|mitigated|not_applicable|verify)\s*\|\s*[^\n]+/gi,'').replace(/\n{3,}/g,'\n\n').trim();}
+function applyVerdict(v){const i=DATA.findIndex(f=>f.cve===v.cve&&f.asset===v.asset);if(i>=0){DATA[i].status=v.status;DATA[i].note=v.note;}}
+function applyOne(k){if(LASTVERDICTS[k]){applyVerdict(LASTVERDICTS[k]);renderList();renderChat();}}
+function applyAll(){LASTVERDICTS.forEach(applyVerdict);renderList();renderChat();}
+
+async function turn(userText,hidden){const s=CUR,t=T(),c=cfg();
+ if(c.key===''&&PROVIDERS[c.provider].key){sysMsg(t.noKey);return;}
+ if(!hidden){let shown=userText;
+  if(byId('redact').checked){const red=redactSecrets(userText);if(red!==userText){shown=red+'\n'+t.redactedNote;userText=red;}}
+  s.chat.push({role:'user',content:shown});
+ }else s.chat.push({role:'user',content:userText});
+ renderChat();sysMsg(t.thinking);
+ try{const hist=s.chat.filter(m=>m.role==='user'||m.role==='assistant').map(m=>({role:m.role,content:m.content}));
+  const reply=await callLLM(systemPrompt(s),hist);
+  s.chat=s.chat.filter(m=>!(m.role==='_sys'&&(m.content===t.thinking||m.prog)));
+  s.chat.push({role:'assistant',content:reply});renderChat();
+ }catch(e){s.chat=s.chat.filter(m=>!(m.role==='_sys'&&(m.content===t.thinking||m.prog)));s.chat.push({role:'_sys',content:'⚠ '+e.message});renderChat();}}
+function send(){const ta=byId('compose'),v=ta.value.trim();if(!v||!CUR)return;ta.value='';turn(v,false);}
+byId('compose').addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){e.preventDefault();send();}});
+
+// ---------- export ----------
+function exportReport(){const t=T();if(!DATA.length){alert(t.noFindings);return;}
+ const STC={vulnerable:'#e11d48',mitigated:'#0fae82',not_applicable:'#54607a',verify:'#d9731a',none:'#8b94a6'};
+ const order=DATA.map((f,i)=>i).sort((a,b)=>(TORDER[DATA[a].tier]??9)-(TORDER[DATA[b].tier]??9));
+ const rows=order.map((i,k)=>{const f=DATA[i];return `<tr><td>${k+1}</td><td><b style="color:${TC[f.tier]||'#888'}">${f.tier}</b></td><td>${esc(f.cve)}</td><td>${esc(f.asset)}</td><td><b style="color:${STC[f.status]||'#888'}">${esc(stLabel(f.status))}</b></td><td>${esc(f.note||'')}</td></tr>`;}).join('');
+ const html=`<!doctype html><html lang="${LANG}"><head><meta charset="utf-8"><title>${t.reportTitle}</title><style>
+ body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#141a24;background:#fff;margin:0;padding:32px;line-height:1.5}
+ h1{font-size:20px;margin:0 0 2px}.sub{color:#69728a;font-size:12px;margin:0 0 18px}
+ table{border-collapse:collapse;width:100%;font-size:12px}th,td{text-align:left;padding:7px 9px;border-bottom:1px solid #eef1f5;vertical-align:top}
+ th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#69728a;border-bottom:2px solid #e2e7ee}
+ td:last-child{color:#46506a;max-width:340px}.meth{margin-top:20px;font-size:11px;color:#69728a;border-top:1px solid #eef1f5;padding-top:12px}
+ @media print{body{padding:0}tr{break-inside:avoid}}</style></head><body>
+ <h1>${t.reportTitle}</h1><p class="sub">${t.gen} ${esc(new Date().toLocaleString())}</p>
+ <table><thead><tr>${t.cols.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>
+ <p class="meth">${esc(t.meth)}</p></body></html>`;
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
+ a.download='fixfew-report-'+new Date().toISOString().slice(0,10)+'.html';document.body.appendChild(a);a.click();
+ setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);}
+
+// ---------- hero helpers ----------
+function goTo(id){const el=byId(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+function dotfield(){const f=byId('dotfield');if(!f)return;let h='';for(let i=0;i<70;i++){const hot=Math.random()<0.12;h+='<i class="'+(hot?'hot':'')+'" style="left:'+(Math.random()*100).toFixed(2)+'%;top:'+(Math.random()*100).toFixed(2)+'%"></i>';}f.innerHTML=h;}
+
+// ---------- init ----------
+initProviders();applyTheme();applyLang();dotfield();
+</script>
+</body>
+</html>
