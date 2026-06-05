@@ -72,6 +72,12 @@ Vanilla HTML / CSS / JavaScript, no framework, no build.
 In-browser inference: [WebLLM](https://github.com/mlc-ai/web-llm) (loaded from CDN on demand).
 CVE grounding: [NVD](https://nvd.nist.gov/) REST API.
 
+## The Few toolkit
+
+- [**FirstFew**](https://github.com/silvestroparisi/FirstFew) — prioritize the few that matter
+- **FixFew** — verify and remediate
+- [**MaskFew**](https://github.com/silvestroparisi/MaskFew) — anonymize a file before you share it with a cloud tool or AI
+
 ## License
 
 [MIT](LICENSE) © 2026 Silvestro Parisi
