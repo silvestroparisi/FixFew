@@ -28,7 +28,7 @@ This is the core design choice:
 - If you want sharper reasoning, you can plug in **your own API key** for a more capable cloud model (OpenAI, Anthropic, Google Gemini, OpenRouter, a local server, or any OpenAI-compatible endpoint). That's *your* choice, and the key lives in memory only — it is never stored or sent anywhere except the provider you pick.
 - A **"redact secrets"** toggle (on by default) masks passwords, SNMP communities, tokens and keys in whatever you paste before it's sent. With the in-browser model nothing leaves the device anyway; this matters most when you've loaded your own key.
 
-Don't trust it? You don't have to — read every line in `index.html`.
+Don't trust it? You don't have to — it's open source. Open your browser's DevTools → Network and watch: nothing leaves your device, unless you choose to use a cloud API key, in which case you can see exactly what's sent.
 
 ## How it works
 
