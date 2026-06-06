@@ -134,7 +134,7 @@
   .hide{display:none!important;}
   .famly{max-width:900px;margin:50px auto 0;padding:8px 0 4px;}
   .famly-h{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);margin:0 0 11px;}
-  .famly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  .famly-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;}
   @media(max-width:620px){.famly-grid{grid-template-columns:1fr;}}
   .famcard{display:flex;flex-direction:column;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 28px 12px 14px;text-decoration:none;transition:.15s;position:relative;}
   .famcard::after{content:"→";position:absolute;top:12px;right:13px;color:var(--txt-faint);font-size:12px;transition:.15s;}
@@ -245,6 +245,7 @@
     <div class="famly-grid">
       <a class="famcard" href="https://silvestroparisi.github.io/FirstFew/" target="_blank" rel="noopener"><span class="famname">First<span class="ac">Few</span></span><span class="famtag" id="famFirst"></span></a>
       <a class="famcard" href="https://silvestroparisi.github.io/MaskFew/" target="_blank" rel="noopener"><span class="famname">Mask<span class="ac">Few</span></span><span class="famtag" id="famMask"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/ScrubFew/" target="_blank" rel="noopener"><span class="famname">Scrub<span class="ac">Few</span></span><span class="famtag" id="famScrub"></span></a>
       <a class="famcard" href="https://silvestroparisi.github.io/AskFew/" target="_blank" rel="noopener"><span class="famname">Ask<span class="ac">Few</span></span><span class="famtag" id="famAsk"></span></a>
     </div>
   </div>
@@ -310,6 +311,7 @@ const I18N={
   famFirst:`Prioritize the few that matter.`,
   famMask:`Mask the few that expose you.`,
   famAsk:`A private AI, in your browser.`,
+  famScrub:`Strip the few traces you can't see.`,
   footer:`Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · CVE data: NVD.<div style="margin-top:9px">More from me on <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`,
   send:`Send`, composePh:`Answer, or paste a config / command output…`,
   noKey:`Set your provider and API key in section 1 first.`,
@@ -364,6 +366,7 @@ const I18N={
   famFirst:`Prioritizza i pochi che contano.`,
   famMask:`Maschera i pochi che ti espongono.`,
   famAsk:`Un'AI privata, nel browser.`,
+  famScrub:`Cancella le poche tracce nascoste.`,
   footer:`Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · dati CVE: NVD.<div style="margin-top:9px">Altro da me su <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`,
   send:`Invia`, composePh:`Rispondi, o incolla una config / l'output di un comando…`,
   noKey:`Imposta prima provider e chiave API nella sezione 1.`,
@@ -407,7 +410,7 @@ function applyLang(){const t=T();document.documentElement.lang=LANG;
  byId('btnDemo').textContent=t.btnDemo;byId('demoNote').textContent=t.demoNote;
  byId('btnSend').textContent=t.send;byId('compose').placeholder=t.composePh;
  byId('footer').innerHTML=t.footer;
- byId('famlyH').textContent=t.famlyH; byId('famFirst').textContent=t.famFirst; byId('famMask').textContent=t.famMask; byId('famAsk').textContent=t.famAsk;
+ byId('famlyH').textContent=t.famlyH; byId('famFirst').textContent=t.famFirst; byId('famMask').textContent=t.famMask; byId('famAsk').textContent=t.famAsk; byId('famScrub').textContent=t.famScrub;
  byId('viewLabel').textContent=t.viewLabel;
  byId('impCount').textContent=DATA.length?t.count(DATA.length):'';
  document.querySelectorAll('#viewSeg span').forEach(s=>{s.textContent=s.dataset.v==='asset'?t.vAsset:s.dataset.v==='cve'?t.vCve:t.vFlat;s.classList.toggle('on',s.dataset.v===VIEW);});

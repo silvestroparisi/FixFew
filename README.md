@@ -79,6 +79,7 @@ CVE grounding: [NVD](https://nvd.nist.gov/) REST API.
 - [**FirstFew**](https://silvestroparisi.github.io/FirstFew/) — prioritize the few that matter
 - **FixFew** — verify and remediate
 - [**MaskFew**](https://silvestroparisi.github.io/MaskFew/) — anonymize a file before you share it
+- [**ScrubFew**](https://silvestroparisi.github.io/ScrubFew/) — strip hidden metadata before you share
 - [**AskFew**](https://silvestroparisi.github.io/AskFew/) — a private AI that runs in your browser
 
 ## License
