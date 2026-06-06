@@ -16,7 +16,7 @@
   code{font-family:'IBM Plex Mono',monospace;font-size:.92em;background:var(--panel-2);padding:1px 5px;border-radius:4px;}
   .wrap{max-width:980px;margin:0 auto;padding:0 18px;}
   .topbar{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
-  .topbar .row{display:flex;align-items:center;gap:12px;padding:12px 0;}
+  .topbar .row{display:flex;align-items:center;gap:12px;padding:12px 22px;}
   .brand{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:19px;font-weight:700;letter-spacing:.02em;}
   .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
   .ac{color:var(--accent);}
@@ -33,6 +33,8 @@
   .banner{display:flex;gap:11px;background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--warn);border-radius:10px;padding:13px 15px;margin:0 0 22px;font-size:13px;color:var(--txt-dim);}
   .banner b{color:var(--txt);}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin:0 0 16px;}
+  .startlede{font-family:'Space Mono',monospace;font-weight:700;font-size:clamp(22px,3.4vw,30px);margin:72px 0 16px;padding-top:34px;border-top:1px solid var(--line);}
+  .startlede .ac{color:var(--accent);}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media(max-width:640px){.grid{grid-template-columns:1fr}}
   label.fld{display:block;font-size:12px;color:var(--txt-dim);margin:0 0 5px;font-family:'IBM Plex Mono',monospace;letter-spacing:.04em;}
@@ -85,7 +87,7 @@
   .pill{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--txt-faint);align-self:center;}
   footer{margin-top:34px;padding:18px 0 40px;border-top:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--txt-faint);line-height:1.7;}
   footer a{color:var(--accent);text-decoration:none;}
-  .story{max-width:730px;margin:8px 0 24px;color:var(--txt-dim);font-size:15px;}
+  .story{margin:8px 0 24px;color:var(--txt-dim);font-size:15px;}
   .story p{margin:0 0 13px;}
   .story b{color:var(--txt);}
   .signals{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 24px;}
@@ -99,7 +101,7 @@
   .signals .sig:nth-child(1) .sig-h{color:var(--accent)}
   .signals .sig:nth-child(2) .sig-h{color:var(--op)}
   .signals .sig:nth-child(3) .sig-h{color:var(--p3)}
-  .mission{border-left:3px solid var(--accent);padding:5px 0 5px 16px;margin:0 0 22px;font-size:15px;color:var(--txt);max-width:730px;}
+  .mission{border-left:3px solid var(--accent);padding:5px 0 5px 16px;margin:0 0 22px;font-size:15px;color:var(--txt);}
   .stepsH{font-family:'Space Mono',monospace;font-size:18px;margin:0 0 11px;}
   .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 18px;}
   @media(max-width:680px){.steps{grid-template-columns:1fr}}
@@ -133,14 +135,14 @@
 </style>
 </head>
 <body>
-<div class="topbar"><div class="wrap"><div class="row">
+<div class="topbar"><div class="row">
   <div class="brand"><span class="dot"></span><span>Fix<span class="ac">Few</span></span></div>
   <div class="tb-right">
     <a class="back" id="backLink" href="https://silvestroparisi.github.io/FirstFew/"></a>
     <div class="themesw"><span data-t="light" onclick="setTheme('light')">☀</span><span data-t="dark" onclick="setTheme('dark')">☾</span></div>
     <div class="langsw"><span data-l="it" onclick="setLang('it')">IT</span><span data-l="en" onclick="setLang('en')">EN</span></div>
   </div>
-</div></div></div>
+</div></div>
 
 <section class="hero">
   <div class="dotfield" id="dotfield"></div>
@@ -179,6 +181,8 @@
   <p class="trust" id="trust"></p>
 
   <div class="banner" id="privacyBan" style="border-left-color:var(--accent)"><span>◆</span><span id="privacy"></span></div>
+
+  <h2 class="startlede" id="startLede"></h2>
 
   <div class="card" id="start">
     <h2 id="setH"></h2>
@@ -266,6 +270,7 @@ const I18N={
   trust:`Don't trust it? You don't have to — it's open source. Open your DevTools → Network and watch: nothing leaves your device, until <b>you</b> choose to use a cloud API key — and then you see exactly what's sent.`,
   privacy:`<b>By default a model runs inside your browser</b>, so nothing you paste leaves your device. Only if <b>you</b> choose to load your own API key — for a more capable model — does your data go to that provider, and even then the key lives in memory only: never stored, never sent anywhere else. Don't take our word for it — it's <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">open source</a>.`,
   back:`← FirstFew`,
+  startLede:`Let's <span class="ac">start</span>.`,
   setH:`1 · Your AI`, setSub:`A local model is ready — no key needed. Want sharper reasoning? Add your own key for a frontier model; it's kept in memory only.`,
   lProvider:`Provider`, lModel:`Model`, lBase:`Endpoint (base URL)`, lKey:`API key`,
   lRedact:`Redact obvious secrets (passwords, SNMP communities, keys) before sending`,
@@ -315,6 +320,7 @@ const I18N={
   trust:`Non ti fidi? Non sei costretto — è open source. Apri i DevTools → Network e guarda: non esce nulla dal dispositivo, finché non sei <b>tu</b> a usare una chiave API cloud — e allora vedi esattamente cosa parte.`,
   privacy:`<b>Di default un modello gira dentro il tuo browser</b>, quindi niente di ciò che incolli lascia il dispositivo. Solo se sei <b>tu</b> a caricare la tua chiave API — per un modello più capace — i tuoi dati vanno a quel provider, e anche allora la chiave resta solo in memoria: mai salvata, mai inviata altrove. Non fidarti sulla parola — è <a href="https://github.com/silvestroparisi/FixFew" target="_blank" rel="noopener">open source</a>.`,
   back:`← FirstFew`,
+  startLede:`<span class="ac">Iniziamo</span>.`,
   setH:`1 · La tua AI`, setSub:`Un modello locale è pronto — nessuna chiave. Vuoi un ragionamento più affilato? Aggiungi la tua chiave per un modello frontier; resta solo in memoria.`,
   lProvider:`Provider`, lModel:`Modello`, lBase:`Endpoint (base URL)`, lKey:`Chiave API`,
   lRedact:`Oscura i segreti evidenti (password, community SNMP, chiavi) prima di inviare`,
@@ -363,7 +369,7 @@ function applyLang(){const t=T();document.documentElement.lang=LANG;
  byId('heroEyebrow').textContent=t.heroEyebrow;byId('heroH1').textContent=t.heroH1;byId('heroH1b').textContent=t.heroH1b;byId('heroSub').textContent=t.lead;byId('heroCta1').textContent=t.cta1;byId('heroCta2').textContent=t.cta2;byId('privacy').innerHTML=t.privacy;
  byId('story1').innerHTML=t.story1;byId('story2').innerHTML=t.story2;byId('mission').textContent=t.mission;
  byId('sig1h').textContent=t.sig1h;byId('sig1b').textContent=t.sig1b;byId('sig2h').textContent=t.sig2h;byId('sig2b').textContent=t.sig2b;byId('sig3h').textContent=t.sig3h;byId('sig3b').textContent=t.sig3b;
- byId('stepsH').textContent=t.stepsH;byId('trust').innerHTML=t.trust;
+ byId('stepsH').textContent=t.stepsH;byId('trust').innerHTML=t.trust;byId('startLede').innerHTML=t.startLede;
  byId('st1h').textContent=t.st1h;byId('st1b').textContent=t.st1b;byId('st2h').textContent=t.st2h;byId('st2b').textContent=t.st2b;byId('st3h').textContent=t.st3h;byId('st3b').textContent=t.st3b;
  byId('backLink').textContent=t.back;
  byId('setH').textContent=t.setH;byId('setSub').textContent=t.setSub;
