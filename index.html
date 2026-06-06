@@ -18,7 +18,7 @@
   .topbar{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
   .topbar .row{display:flex;align-items:center;gap:12px;padding:12px 22px;}
   .brand{display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:19px;font-weight:700;letter-spacing:.02em;}
-  .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);}
+  .dot{width:8px;height:8px;border-radius:2px;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2.6s infinite;}
   .ac{color:var(--accent);}
   .tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
   .back{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txt-dim);}
@@ -132,6 +132,17 @@
   .hero .cta button{padding:14px 22px;font-size:13px;border-radius:9px;text-transform:uppercase;letter-spacing:.07em;}
   .scrollcue{position:absolute;bottom:20px;left:50%;color:var(--txt-faint);font-size:20px;z-index:2;animation:bob 1.8s infinite;}
   .hide{display:none!important;}
+  .famly{max-width:900px;margin:50px auto 0;padding:8px 0 4px;}
+  .famly-h{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--txt-faint);margin:0 0 11px;}
+  .famly-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  @media(max-width:620px){.famly-grid{grid-template-columns:1fr;}}
+  .famcard{display:flex;flex-direction:column;gap:3px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 28px 12px 14px;text-decoration:none;transition:.15s;position:relative;}
+  .famcard::after{content:"→";position:absolute;top:12px;right:13px;color:var(--txt-faint);font-size:12px;transition:.15s;}
+  .famcard:hover{border-color:var(--accent);transform:translateY(-2px);}
+  .famcard:hover::after{color:var(--accent);transform:translateX(2px);}
+  .famname{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:var(--txt);}
+  .famname .ac{color:var(--accent);}
+  .famtag{font-size:11.5px;color:var(--txt-dim);line-height:1.4;}
 </style>
 </head>
 <body>
@@ -229,6 +240,15 @@
 
   <div id="list"></div>
 
+  <div class="famly">
+    <div class="famly-h" id="famlyH"></div>
+    <div class="famly-grid">
+      <a class="famcard" href="https://silvestroparisi.github.io/FirstFew/" target="_blank" rel="noopener"><span class="famname">First<span class="ac">Few</span></span><span class="famtag" id="famFirst"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/MaskFew/" target="_blank" rel="noopener"><span class="famname">Mask<span class="ac">Few</span></span><span class="famtag" id="famMask"></span></a>
+      <a class="famcard" href="https://silvestroparisi.github.io/AskFew/" target="_blank" rel="noopener"><span class="famname">Ask<span class="ac">Few</span></span><span class="famtag" id="famAsk"></span></a>
+    </div>
+  </div>
+
   <footer id="footer"></footer>
 </div>
 
@@ -286,7 +306,11 @@ const I18N={
   count:n=>`${n} findings loaded`,
   viewLabel:`Group by:`, vAsset:`Asset`, vCve:`CVE`, vFlat:`Flat`,
   assistAsset:n=>`Assist asset · ${n} CVE${n>1?'s':''}`, assistCve:n=>`Assist CVE · ${n} asset${n>1?'s':''}`, assistOne:`Assist`,
-  footer:`<div style="margin-bottom:9px"><b style="color:var(--txt)">The Few toolkit</b> · <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a> · FixFew · <a href="https://github.com/silvestroparisi/MaskFew" target="_blank" rel="noopener">MaskFew</a> · <a href="https://github.com/silvestroparisi/AskFew" target="_blank" rel="noopener">AskFew</a></div>Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · CVE data: NVD.`,
+  famlyH:`The rest of the Few toolkit`,
+  famFirst:`Prioritize the few that matter.`,
+  famMask:`Mask the few that expose you.`,
+  famAsk:`A private AI, in your browser.`,
+  footer:`Built by <b style="color:var(--txt)">Silvestro Parisi</b> · open source · CVE data: NVD.<div style="margin-top:9px">More from me on <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`,
   send:`Send`, composePh:`Answer, or paste a config / command output…`,
   noKey:`Set your provider and API key in section 1 first.`,
   grounding:`Reading CVE details…`, groundFail:`Some CVE details couldn't be fetched — the assistant will rely on the model's knowledge for those.`,
@@ -336,7 +360,11 @@ const I18N={
   count:n=>`${n} finding caricati`,
   viewLabel:`Raggruppa per:`, vAsset:`Asset`, vCve:`CVE`, vFlat:`Singoli`,
   assistAsset:n=>`Assisti asset · ${n} CVE`, assistCve:n=>`Assisti CVE · ${n} asset`, assistOne:`Assisti`,
-  footer:`<div style="margin-bottom:9px"><b style="color:var(--txt)">Il toolkit Few</b> · <a href="https://github.com/silvestroparisi/FirstFew" target="_blank" rel="noopener">FirstFew</a> · FixFew · <a href="https://github.com/silvestroparisi/MaskFew" target="_blank" rel="noopener">MaskFew</a> · <a href="https://github.com/silvestroparisi/AskFew" target="_blank" rel="noopener">AskFew</a></div>Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · dati CVE: NVD.`,
+  famlyH:`Il resto del toolkit Few`,
+  famFirst:`Prioritizza i pochi che contano.`,
+  famMask:`Maschera i pochi che ti espongono.`,
+  famAsk:`Un'AI privata, nel browser.`,
+  footer:`Creato da <b style="color:var(--txt)">Silvestro Parisi</b> · open source · dati CVE: NVD.<div style="margin-top:9px">Altro da me su <a href="https://github.com/silvestroparisi" target="_blank" rel="noopener">github.com/silvestroparisi</a></div>`,
   send:`Invia`, composePh:`Rispondi, o incolla una config / l'output di un comando…`,
   noKey:`Imposta prima provider e chiave API nella sezione 1.`,
   grounding:`Leggo i dettagli delle CVE…`, groundFail:`Alcuni dettagli CVE non sono stati recuperati — per quelli l'assistente userà la conoscenza del modello.`,
@@ -379,6 +407,7 @@ function applyLang(){const t=T();document.documentElement.lang=LANG;
  byId('btnDemo').textContent=t.btnDemo;byId('demoNote').textContent=t.demoNote;
  byId('btnSend').textContent=t.send;byId('compose').placeholder=t.composePh;
  byId('footer').innerHTML=t.footer;
+ byId('famlyH').textContent=t.famlyH; byId('famFirst').textContent=t.famFirst; byId('famMask').textContent=t.famMask; byId('famAsk').textContent=t.famAsk;
  byId('viewLabel').textContent=t.viewLabel;
  byId('impCount').textContent=DATA.length?t.count(DATA.length):'';
  document.querySelectorAll('#viewSeg span').forEach(s=>{s.textContent=s.dataset.v==='asset'?t.vAsset:s.dataset.v==='cve'?t.vCve:t.vFlat;s.classList.toggle('on',s.dataset.v===VIEW);});

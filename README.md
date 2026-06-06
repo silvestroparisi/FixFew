@@ -7,6 +7,8 @@ FirstFew tells you *which* findings matter; FixFew helps you actually close them
 
 It's a single, self-contained web page. No backend, no build step, no tracking.
 
+🔗 **Live:** https://silvestroparisi.github.io/FixFew/
+
 > Stop patching everything. Fix the Few that matter.
 
 ## What it does
@@ -74,10 +76,10 @@ CVE grounding: [NVD](https://nvd.nist.gov/) REST API.
 
 ## The Few toolkit
 
-- [**FirstFew**](https://github.com/silvestroparisi/FirstFew) — prioritize the few that matter
+- [**FirstFew**](https://silvestroparisi.github.io/FirstFew/) — prioritize the few that matter
 - **FixFew** — verify and remediate
-- [**MaskFew**](https://github.com/silvestroparisi/MaskFew) — anonymize a file before you share it
-- [**AskFew**](https://github.com/silvestroparisi/AskFew) — a private AI that runs in your browser
+- [**MaskFew**](https://silvestroparisi.github.io/MaskFew/) — anonymize a file before you share it
+- [**AskFew**](https://silvestroparisi.github.io/AskFew/) — a private AI that runs in your browser
 
 ## License
 
