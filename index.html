@@ -21,7 +21,8 @@
   .dot{width:8px;height:8px;border-radius:2px;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2.6s infinite;}
   .ac{color:var(--accent);}
   .tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-  .back{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txt-dim);}
+  .back{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--txt-dim);background:none;border:0;padding:0;cursor:pointer;transition:.15s;}
+  .back:hover{color:var(--accent);}
   .langsw,.themesw{display:inline-flex;border:1px solid var(--line);border-radius:20px;overflow:hidden;font-family:'IBM Plex Mono',monospace;font-size:11px;}
   .langsw span,.themesw span{padding:7px 11px;cursor:pointer;color:var(--txt-faint);user-select:none;letter-spacing:.06em;}
   .langsw span.on,.themesw span.on{background:var(--accent);color:#04140f;font-weight:600;}
@@ -149,7 +150,7 @@
 <div class="topbar"><div class="row">
   <div class="brand"><span class="dot"></span><span>Fix<span class="ac">Few</span></span></div>
   <div class="tb-right">
-    <a class="back" id="backLink" href="https://silvestroparisi.github.io/FirstFew/"></a>
+    <button class="back" id="btnHow" onclick="goTo('stepsH')"></button>
     <div class="themesw"><span data-t="light" onclick="setTheme('light')">☀</span><span data-t="dark" onclick="setTheme('dark')">☾</span></div>
     <div class="langsw"><span data-l="it" onclick="setLang('it')">IT</span><span data-l="en" onclick="setLang('en')">EN</span></div>
   </div>
@@ -402,7 +403,7 @@ function applyLang(){const t=T();document.documentElement.lang=LANG;
  byId('sig1h').textContent=t.sig1h;byId('sig1b').textContent=t.sig1b;byId('sig2h').textContent=t.sig2h;byId('sig2b').textContent=t.sig2b;byId('sig3h').textContent=t.sig3h;byId('sig3b').textContent=t.sig3b;
  byId('stepsH').textContent=t.stepsH;byId('trust').innerHTML=t.trust;byId('startLede').innerHTML=t.startLede;
  byId('st1h').textContent=t.st1h;byId('st1b').textContent=t.st1b;byId('st2h').textContent=t.st2h;byId('st2b').textContent=t.st2b;byId('st3h').textContent=t.st3h;byId('st3b').textContent=t.st3b;
- byId('backLink').textContent=t.back;
+ byId('btnHow').textContent='ⓘ '+t.cta2;
  byId('setH').textContent=t.setH;byId('setSub').textContent=t.setSub;
  byId('lProvider').textContent=t.lProvider;byId('lModel').textContent=t.lModel;byId('lBase').textContent=t.lBase;byId('lKey').textContent=t.lKey;byId('lRedact').textContent=t.lRedact;byId('redactHelp').textContent=t.redactHelp;
  byId('lWlModel').textContent=t.lWlModel;byId('wlNoteTxt').innerHTML=t.wlNote;
