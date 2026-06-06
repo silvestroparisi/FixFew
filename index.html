@@ -503,7 +503,7 @@ function wlProgress(txt){const s=CUR;if(!s)return;const i=s.chat.findIndex(m=>m.
 async function getEngine(modelId){if(!navigator.gpu)throw new Error(T().noWebGPU);const lib=await loadWebLLM();
  if(WL_ENGINE&&WL_MODEL===modelId)return WL_ENGINE;
  wlProgress(T().wlInit);
- WL_ENGINE=await lib.CreateMLCEngine(modelId,{initProgressCallback:r=>wlProgress((r&&r.text)?r.text:T().wlInit)});
+ WL_ENGINE=await lib.CreateMLCEngine(modelId,{appConfig:{...lib.prebuiltAppConfig, useIndexedDBCache:true},initProgressCallback:r=>wlProgress((r&&r.text)?r.text:T().wlInit)});
  WL_MODEL=modelId;return WL_ENGINE;}
 
 // ---------- LLM ----------
