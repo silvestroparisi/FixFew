@@ -77,10 +77,13 @@ CVE grounding: [NVD](https://nvd.nist.gov/) REST API.
 ## The Few toolkit
 
 - [**FirstFew**](https://silvestroparisi.github.io/FirstFew/) — prioritize the few that matter
-- **FixFew** — verify and remediate
+- **FixFew** — verify and remediate vulnerabilities
 - [**MaskFew**](https://silvestroparisi.github.io/MaskFew/) — anonymize a file before you share it
-- [**ScrubFew**](https://silvestroparisi.github.io/ScrubFew/) — strip hidden metadata before you share
 - [**AskFew**](https://silvestroparisi.github.io/AskFew/) — a private AI that runs in your browser
+- [**ScrubFew**](https://silvestroparisi.github.io/ScrubFew/) — strip hidden metadata before you share
+- [**RopaFew**](https://silvestroparisi.github.io/RopaFew/) — build your GDPR Article 30 register
+- [**GapFew**](https://silvestroparisi.github.io/GapFew/) — a multi-framework compliance gap self-assessment
+- [**CloseFew**](https://silvestroparisi.github.io/CloseFew/) — turn your gaps into a remediation plan
 
 ## License
 
